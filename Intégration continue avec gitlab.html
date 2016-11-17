@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge"><![endif]-->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 1.5.4">
+<meta name="author" content="J.-M. Bruel">
+<title>Intégration continue avec gitlab</title>
+<link rel="stylesheet" href="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/css.css">
+<link rel="stylesheet" href="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/asciidoctor.css">
+<link rel="stylesheet" href="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/font-awesome.css">
+<link rel="stylesheet" href="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/pygments-default.css">
+<link href="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/translator.css" id="SL_Style" type="text/css" rel="stylesheet"></head>
+<body id="ci" class="article toc2 toc-left">
+<div id="header">
+<h1><strong>Intégration continue</strong> avec gitlab</h1>
+<div class="details">
+<span id="author" class="author">J.-M. Bruel</span><br>
+<span id="email" class="email"><a href="mailto:jbruel@gmail.com">jbruel@gmail.com</a></span><br>
+<span id="revnumber">version 1.0 2016-09-30</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table des matières</div>
+<ul class="sectlevel1">
+<li><a href="#_objectifs">1. Objectifs</a>
+<ul class="sectlevel2">
+<li><a href="#_une_v%C3%A9rification_strong_syst%C3%A9matique_strong_de_l_%C3%A9tat_du_code">1.1. Une vérification <strong>systématique</strong> de l’état du code</a></li>
+<li><a href="#_environnement">1.2. Environnement</a></li>
+<li><a href="#_e_strong_x_strong_treme_strong_p_strong_rogramming">1.3. e<strong>X</strong>treme <strong>P</strong>rogramming</a></li>
+<li><a href="#_principe_g%C3%A9n%C3%A9ral">1.4. Principe général</a></li>
+<li><a href="#_yaml">1.5. YAML</a></li>
+</ul>
+</li>
+<li><a href="#_utilisation">2. Utilisation</a></li>
+<li><a href="#_services_connus">3. Services connus</a></li>
+<li><a href="#_pour_notre_environnement_gitlab">4. Pour notre environnement (GitLab)</a>
+<ul class="sectlevel2">
+<li><a href="#_processus_type">4.1. Processus type</a></li>
+<li><a href="#_exemple_mpa2016_1b2">4.2. Exemple (MPA2016-1B2)</a></li>
+<li><a href="#_exemple_helloworld">4.3. Exemple HelloWorld</a></li>
+</ul>
+</li>
+<li><a href="#_divers">5. Divers</a>
+<ul class="sectlevel2">
+<li><a href="#_quand_on_ne_veux_pas_lancer_l_ic">5.1. Quand on ne veux pas lancer l’IC</a></li>
+<li><a href="#_pour_v%C3%A9rifier_la_syntaxe_de_son_fichier_yaml">5.2. Pour vérifier la syntaxe de son fichier YAML</a></li>
+</ul>
+</li>
+<li><a href="#_liens_utiles">6. Liens utiles</a></li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_objectifs">1. Objectifs</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_une_vérification_strong_systématique_strong_de_l_état_du_code">1.1. Une vérification <strong>systématique</strong> de l’état du code</h3>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/builds_status.png" alt="builds status" width="100%">
+</div>
+<div class="title">Figure 1. Résultats visibles et tracés</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_environnement">1.2. Environnement</h3>
+<div class="paragraph">
+<p>On utilise gitlab-ci-multi-runner <code>1.6.0</code>.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_e_strong_x_strong_treme_strong_p_strong_rogramming">1.3. e<strong>X</strong>treme <strong>P</strong>rogramming</h3>
+<div class="quoteblock">
+<blockquote>
+Continuous Integration is a software development practice where members 
+of a team integrate their work frequently, […​] leading to multiple 
+integrations per day.
+</blockquote>
+<div class="attribution">
+— Martin Fowler
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_principe_général">1.4. Principe général</h3>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/travis.png" alt="travis" width="100%">
+</div>
+<div class="title">Figure 2. Exemple d’Intégration Continue (github-travis)</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<a class="image" href="https://about.gitlab.com/gitlab-ci/"><img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/arch1.jpg" alt="arch1" width="80%"></a>
+</div>
+<div class="title">Figure 3. Architecture GitLab-CI (https://about.gitlab.com/gitlab-ci/)</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_yaml">1.5. YAML</h3>
+<div class="paragraph">
+<p><a href="http://yaml.org/">YAML</a>: <strong>Y</strong>AML <strong>A</strong>in’t <strong>M</strong>arkup <strong>L</strong>anguage</p>
+</div>
+<div class="literalblock">
+<div class="title">Exemple de fihier <code>.yml</code></div>
+<div class="content">
+<pre>---
+receipt:     Oz-Ware Purchase Invoice
+date:        2012-08-06
+customer:
+    first_name:   Dorothy
+    family_name:  Gale</pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tbody><tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Utiliser des espaces et non des tabulations.
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_utilisation">2. Utilisation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Un serveur d’intégration continue peut permettre de :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Faire les opérations type git <span class="detail">(pull, checkout, push)</span></p>
+</li>
+<li>
+<p>Compiler du code source ⇒ <strong>build</strong></p>
+</li>
+<li>
+<p>Créer des archives</p>
+</li>
+<li>
+<p>Déployer du code sur une machine de test</p>
+</li>
+<li>
+<p>Exécuter une suite de <strong>tests</strong> <span class="detail">(Junit, Audit de code source, test IHM, …​)</span></p>
+</li>
+<li>
+<p>Notifier des résultats <span class="detail">(mail, RSS)</span></p>
+</li>
+<li>
+<p>etc.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_services_connus">3. Services connus</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Les serveurs d’intégration les plus connus (<a href="https://en.wikipedia.org/wiki/Comparison_of_continuous_integration_software">Wikipedia</a> en compte plus de 40!) :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="http://cruisecontrol.sourceforge.net/">Cruise Control</a></p>
+</li>
+<li>
+<p><a href="http://hudson-ci.org/">Hudson</a></p>
+</li>
+<li>
+<p><a href="https://travis-ci.org/">Travis CI</a></p>
+</li>
+<li>
+<p><a href="https://jenkins.io/">Jenkins</a></p>
+</li>
+<li>
+<p><a href="https://about.gitlab.com/gitlab-ci/">Gitlab CI</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_pour_notre_environnement_gitlab">4. Pour notre environnement (GitLab)</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_processus_type">4.1. Processus type</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Créer à la racine du projet un fichier <code>.gitlab-ci.yml</code></p>
+</li>
+<li>
+<p>Y décrire ce que l’on souhaite réaliser</p>
+</li>
+<li>
+<p>"Pousser" dans le dépôt <span class="icon"><i class="fa fa-gitlab"></i></span><a href="https://gitlab.com/">GitLab</a> ses modifications</p>
+</li>
+<li>
+<p>Contrôler les résultats</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exemple_mpa2016_1b2">4.2. Exemple (MPA2016-1B2)</h3>
+<div class="literalblock">
+<div class="content">
+<pre>image: node:4.2.2   <i class="conum" data-value="1"></i><b>(1)</b>
+
+all_tests:
+  script:           <i class="conum" data-value="2"></i><b>(2)</b>
+   - npm install express --save
+   - node ./myapp.js</pre>
+</div>
+</div>
+<div class="colist arabic">
+<table>
+<tbody><tr>
+<td><i class="conum" data-value="1"></i><b>1</b></td>
+<td>Nom du "runner"</td>
+</tr>
+<tr>
+<td><i class="conum" data-value="2"></i><b>2</b></td>
+<td>Instructions à réaliser sur la machine</td>
+</tr>
+</tbody></table>
+</div>
+<div class="paragraph">
+<p>Résultat avec le fichier <code>.gitlab-ci.yml</code> précédent :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/gitlabCI-1B2-1.png" alt="gitlabCI 1B2 1" width="50%">
+</div>
+<div class="title">Figure 4. Attention au code infini</div>
+</div>
+<div class="paragraph">
+<p>Avec un fichier <code>.gitlab-ci.yml</code> plus conforme (exécution de tests) :</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>   - npm install express --save
+   - node ./specs/start.js ./specs/async.spec.js</pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/gitlabCI-1B2-2.png" alt="gitlabCI 1B2 2" width="50%">
+</div>
+<div class="title">Figure 5. Le build est un succès</div>
+</div>
+<div class="paragraph">
+<p>test_async:   stage: test   script:    - npm install    - node ./specs/start.js ./specs/async.spec.js</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_exemple_helloworld">4.3. Exemple HelloWorld</h3>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Code java</p>
+</li>
+<li>
+<p>Petit <code>main</code> de test (pas unitaire)</p>
+</li>
+<li>
+<p>Compilation manuelle</p>
+</li>
+<li>
+<p>Build ant</p>
+</li>
+<li>
+<p>Améliorations</p>
+</li>
+<li>
+<p>Tests</p>
+</li>
+<li>
+<p>Eclipse</p>
+</li>
+<li>
+<p>Intégration continue</p>
+</li>
+</ol>
+</div>
+<div class="sect3">
+<h4 id="_code_java">4.3.1. Code java</h4>
+<div class="admonitionblock note">
+<table>
+<tbody><tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Consultez le tutoriel <a href="http://ant.apache.org/">ant</a> : <a href="https://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html" class="bare">https://ant.apache.org/manual/tutorial-HelloWorldWithAnt.html</a>
+</td>
+</tr>
+</tbody></table>
+</div>
+<div class="listingblock">
+<div class="title">src/HelloWorld.java</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span class="tok-kn">package</span> <span class="tok-n">org</span><span class="tok-o">.</span><span class="tok-na">jmb</span><span class="tok-o">;</span>
+<span class="tok-kd">public</span> <span class="tok-kd">class</span> <span class="tok-nc">HelloWorld</span>
+<span class="tok-o">{</span>
+   <span class="tok-kd">private</span> <span class="tok-n">String</span> <span class="tok-n">name</span> <span class="tok-o">=</span> <span class="tok-s">""</span><span class="tok-o">;</span>
+   <span class="tok-kd">public</span> <span class="tok-n">String</span> <span class="tok-nf">getName</span><span class="tok-o">()</span>
+   <span class="tok-o">{</span>
+      <span class="tok-k">return</span> <span class="tok-n">name</span><span class="tok-o">;</span>
+   <span class="tok-o">}</span>
+   <span class="tok-kd">public</span> <span class="tok-n">String</span> <span class="tok-nf">getMessage</span><span class="tok-o">()</span>
+   <span class="tok-o">{</span>
+      <span class="tok-k">if</span> <span class="tok-o">(</span><span class="tok-n">name</span> <span class="tok-o">==</span> <span class="tok-s">""</span><span class="tok-o">)</span>
+      <span class="tok-o">{</span>
+         <span class="tok-k">return</span> <span class="tok-s">"Hello!"</span><span class="tok-o">;</span>
+      <span class="tok-o">}</span>
+      <span class="tok-k">else</span>
+      <span class="tok-o">{</span>
+         <span class="tok-k">return</span> <span class="tok-s">"Hello "</span> <span class="tok-o">+</span> <span class="tok-n">name</span> <span class="tok-o">+</span> <span class="tok-s">"!"</span><span class="tok-o">;</span>
+      <span class="tok-o">}</span>
+   <span class="tok-o">}</span>
+   <span class="tok-kd">public</span> <span class="tok-kt">void</span> <span class="tok-nf">setName</span><span class="tok-o">(</span><span class="tok-n">String</span> <span class="tok-n">name</span><span class="tok-o">)</span>
+   <span class="tok-o">{</span>
+      <span class="tok-k">this</span><span class="tok-o">.</span><span class="tok-na">name</span> <span class="tok-o">=</span> <span class="tok-n">name</span><span class="tok-o">;</span>
+   <span class="tok-o">}</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_petit_code_main_code_de_test_pas_unitaire">4.3.2. Petit <code>main</code> de test (pas unitaire)</h4>
+<div class="listingblock">
+<div class="title">src/Main.java</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span class="tok-kn">package</span> <span class="tok-n">org</span><span class="tok-o">.</span><span class="tok-na">jmb</span><span class="tok-o">;</span>
+<span class="tok-kd">public</span> <span class="tok-kd">class</span> <span class="tok-nc">Main</span> <span class="tok-o">{</span>
+	<span class="tok-kd">public</span> <span class="tok-kd">static</span> <span class="tok-kt">void</span> <span class="tok-nf">main</span><span class="tok-o">(</span><span class="tok-n">String</span><span class="tok-o">[]</span> <span class="tok-n">args</span><span class="tok-o">)</span> <span class="tok-o">{</span>
+	      <span class="tok-n">HelloWorld</span> <span class="tok-n">h</span> <span class="tok-o">=</span> <span class="tok-k">new</span> <span class="tok-nf">HelloWorld</span><span class="tok-o">();</span>
+	      <span class="tok-n">h</span><span class="tok-o">.</span><span class="tok-na">setName</span><span class="tok-o">(</span><span class="tok-s">"JMB"</span><span class="tok-o">);</span>
+	      <span class="tok-n">System</span><span class="tok-o">.</span><span class="tok-na">out</span><span class="tok-o">.</span><span class="tok-na">println</span><span class="tok-o">(</span><span class="tok-n">h</span><span class="tok-o">.</span><span class="tok-na">getMessage</span><span class="tok-o">());</span>
+	<span class="tok-o">}</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_compilation_manuelle">4.3.3. Compilation manuelle</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>$ javac -sourcepath src -d bin/ src/Main.java
+$ ls bin
+HelloWorld.class	Main.class
+$ java -cp bin Main
+Hello JMB!</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_build_ant">4.3.4. Build ant</h4>
+<div class="listingblock">
+<div class="title">build.xml</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="xml"><span class="tok-nt">&lt;project&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"clean"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;delete</span> <span class="tok-na">dir=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"build"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;javac</span> <span class="tok-na">srcdir=</span><span class="tok-s">"src"</span> <span class="tok-na">destdir=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"jar"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"bin/jar"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;jar</span> <span class="tok-na">destfile=</span><span class="tok-s">"bin/jar/HelloWorld.jar"</span> <span class="tok-na">basedir=</span><span class="tok-s">"bin"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;manifest&gt;</span>
+                <span class="tok-nt">&lt;attribute</span> <span class="tok-na">name=</span><span class="tok-s">"Main-Class"</span> <span class="tok-na">value=</span><span class="tok-s">"Main"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/manifest&gt;</span>
+        <span class="tok-nt">&lt;/jar&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"run"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;java</span> <span class="tok-na">jar=</span><span class="tok-s">"bin/jar/HelloWorld.jar"</span> <span class="tok-na">fork=</span><span class="tok-s">"true"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+<span class="tok-nt">&lt;/project&gt;</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>$ ant clean build jar
+$ ant run
+Buildfile: /Users/bruel/HelloWorld/build.xml
+
+run:
+     [java] Hello JMB!
+
+BUILD SUCCESSFUL
+Total time: 0 seconds</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_améliorations">4.3.5. Améliorations</h4>
+<div class="listingblock">
+<div class="title">build.xml (amélioré)</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="xml"><span class="tok-nt">&lt;project</span> <span class="tok-na">name=</span><span class="tok-s">"HelloWorld"</span> <span class="tok-na">basedir=</span><span class="tok-s">"."</span> <span class="tok-na">default=</span><span class="tok-s">"main"</span><span class="tok-nt">&gt;</span>
+
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"src.dir"</span>     <span class="tok-na">value=</span><span class="tok-s">"src"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"build.dir"</span>   <span class="tok-na">value=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"classes.dir"</span> <span class="tok-na">value=</span><span class="tok-s">"${build.dir}/classes"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"jar.dir"</span>     <span class="tok-na">value=</span><span class="tok-s">"${build.dir}/jar"</span><span class="tok-nt">/&gt;</span>
+
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"main-class"</span>  <span class="tok-na">value=</span><span class="tok-s">"Main"</span><span class="tok-nt">/&gt;</span>
+
+
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"clean"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;delete</span> <span class="tok-na">dir=</span><span class="tok-s">"${build.dir}"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"compile"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"${classes.dir}"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;javac</span> <span class="tok-na">srcdir=</span><span class="tok-s">"${src.dir}"</span> <span class="tok-na">destdir=</span><span class="tok-s">"${classes.dir}"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"jar"</span> <span class="tok-na">depends=</span><span class="tok-s">"compile"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"${jar.dir}"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;jar</span> <span class="tok-na">destfile=</span><span class="tok-s">"${jar.dir}/${ant.project.name}.jar"</span> <span class="tok-na">basedir=</span><span class="tok-s">"${classes.dir}"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;manifest&gt;</span>
+                <span class="tok-nt">&lt;attribute</span> <span class="tok-na">name=</span><span class="tok-s">"Main-Class"</span> <span class="tok-na">value=</span><span class="tok-s">"${main-class}"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/manifest&gt;</span>
+        <span class="tok-nt">&lt;/jar&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"run"</span> <span class="tok-na">depends=</span><span class="tok-s">"jar"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;java</span> <span class="tok-na">jar=</span><span class="tok-s">"${jar.dir}/${ant.project.name}.jar"</span> <span class="tok-na">fork=</span><span class="tok-s">"true"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"clean-build"</span> <span class="tok-na">depends=</span><span class="tok-s">"clean,jar"</span><span class="tok-nt">/&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"main"</span> <span class="tok-na">depends=</span><span class="tok-s">"clean,run"</span><span class="tok-nt">/&gt;</span>
+
+<span class="tok-nt">&lt;/project&gt;</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>$ ant
+Buildfile: /Users/bruel/HelloWorld/build.xml
+
+clean:
+   [delete] Deleting directory /Users/bruel/HelloWorld/bin
+
+compile:
+    [mkdir] Created dir: /Users/bruel/HelloWorld/bin/classes
+    [javac] Compiling 2 source files to /Users/bruel/HelloWorld/bin/classes
+
+jar:
+    [mkdir] Created dir: /Users/bruel/HelloWorld/bin/jar
+      [jar] Building jar: /Users/bruel/HelloWorld/bin/jar/HelloWorld.jar
+
+run:
+     [java] Hello JMB!
+
+main:
+
+BUILD SUCCESSFUL
+Total time: 1 second</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_tests">4.3.6. Tests</h4>
+<div class="listingblock">
+<div class="title">src/TestHelloWorld.java (failing)</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span class="tok-kn">package</span> <span class="tok-n">org</span><span class="tok-o">.</span><span class="tok-na">jmb</span><span class="tok-o">;</span>
+<span class="tok-kd">public</span> <span class="tok-kd">class</span> <span class="tok-nc">TestHelloWorld</span> <span class="tok-kd">extends</span> <span class="tok-n">junit</span><span class="tok-o">.</span><span class="tok-na">framework</span><span class="tok-o">.</span><span class="tok-na">TestCase</span> <span class="tok-o">{</span>
+
+    <span class="tok-kd">public</span> <span class="tok-kt">void</span> <span class="tok-nf">testNothing</span><span class="tok-o">()</span> <span class="tok-o">{</span>
+    <span class="tok-o">}</span>
+
+    <span class="tok-kd">public</span> <span class="tok-kt">void</span> <span class="tok-nf">testWillAlwaysFail</span><span class="tok-o">()</span> <span class="tok-o">{</span>
+        <span class="tok-n">fail</span><span class="tok-o">(</span><span class="tok-s">"An error message"</span><span class="tok-o">);</span>
+    <span class="tok-o">}</span>
+
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">build.xml (librairies extérieures)</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="xml"><span class="tok-nt">&lt;project</span> <span class="tok-na">name=</span><span class="tok-s">"HelloWorld"</span> <span class="tok-na">basedir=</span><span class="tok-s">"."</span> <span class="tok-na">default=</span><span class="tok-s">"main"</span><span class="tok-nt">&gt;</span>
+
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"src.dir"</span>     <span class="tok-na">value=</span><span class="tok-s">"src"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"build.dir"</span>   <span class="tok-na">value=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"classes.dir"</span> <span class="tok-na">value=</span><span class="tok-s">"${build.dir}/classes"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"jar.dir"</span>     <span class="tok-na">value=</span><span class="tok-s">"${build.dir}/jar"</span><span class="tok-nt">/&gt;</span>
+
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"main-class"</span>  <span class="tok-na">value=</span><span class="tok-s">"Main"</span><span class="tok-nt">/&gt;</span>
+
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"lib.dir"</span>     <span class="tok-na">value=</span><span class="tok-s">"lib"</span><span class="tok-nt">/&gt;</span>
+
+    <span class="tok-nt">&lt;path</span> <span class="tok-na">id=</span><span class="tok-s">"classpath"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;fileset</span> <span class="tok-na">dir=</span><span class="tok-s">"${lib.dir}"</span> <span class="tok-na">includes=</span><span class="tok-s">"**/*.jar"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/path&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"clean"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;delete</span> <span class="tok-na">dir=</span><span class="tok-s">"${build.dir}"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"compile"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"${classes.dir}"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;javac</span> <span class="tok-na">srcdir=</span><span class="tok-s">"${src.dir}"</span> <span class="tok-na">destdir=</span><span class="tok-s">"${classes.dir}"</span>  <span class="tok-na">classpathref=</span><span class="tok-s">"classpath"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"jar"</span> <span class="tok-na">depends=</span><span class="tok-s">"compile"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"${jar.dir}"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;jar</span> <span class="tok-na">destfile=</span><span class="tok-s">"${jar.dir}/${ant.project.name}.jar"</span> <span class="tok-na">basedir=</span><span class="tok-s">"${classes.dir}"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;manifest&gt;</span>
+                <span class="tok-nt">&lt;attribute</span> <span class="tok-na">name=</span><span class="tok-s">"Main-Class"</span> <span class="tok-na">value=</span><span class="tok-s">"${main-class}"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/manifest&gt;</span>
+        <span class="tok-nt">&lt;/jar&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;path</span> <span class="tok-na">id=</span><span class="tok-s">"application"</span> <span class="tok-na">location=</span><span class="tok-s">"${jar.dir}/${ant.project.name}.jar"</span><span class="tok-nt">/&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"run"</span> <span class="tok-na">depends=</span><span class="tok-s">"jar"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;java</span> <span class="tok-na">fork=</span><span class="tok-s">"true"</span> <span class="tok-na">classname=</span><span class="tok-s">"${main-class}"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;classpath&gt;</span>
+                <span class="tok-nt">&lt;path</span> <span class="tok-na">refid=</span><span class="tok-s">"classpath"</span><span class="tok-nt">/&gt;</span>
+                <span class="tok-nt">&lt;path</span> <span class="tok-na">refid=</span><span class="tok-s">"application"</span><span class="tok-nt">/&gt;</span>
+                <span class="tok-nt">&lt;path</span> <span class="tok-na">location=</span><span class="tok-s">"${jar.dir}/${ant.project.name}.jar"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/classpath&gt;</span>
+        <span class="tok-nt">&lt;/java&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"junit"</span> <span class="tok-na">depends=</span><span class="tok-s">"jar"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;junit</span> <span class="tok-na">printsummary=</span><span class="tok-s">"yes"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;classpath&gt;</span>
+                <span class="tok-nt">&lt;path</span> <span class="tok-na">refid=</span><span class="tok-s">"classpath"</span><span class="tok-nt">/&gt;</span>
+                <span class="tok-nt">&lt;path</span> <span class="tok-na">refid=</span><span class="tok-s">"application"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/classpath&gt;</span>
+
+            <span class="tok-nt">&lt;batchtest</span> <span class="tok-na">fork=</span><span class="tok-s">"yes"</span><span class="tok-nt">&gt;</span>
+                <span class="tok-nt">&lt;fileset</span> <span class="tok-na">dir=</span><span class="tok-s">"${src.dir}"</span> <span class="tok-na">includes=</span><span class="tok-s">"TestHelloWorld.java"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/batchtest&gt;</span>
+        <span class="tok-nt">&lt;/junit&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"clean-build"</span> <span class="tok-na">depends=</span><span class="tok-s">"clean,jar"</span><span class="tok-nt">/&gt;</span>
+
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"main"</span> <span class="tok-na">depends=</span><span class="tok-s">"clean,run"</span><span class="tok-nt">/&gt;</span>
+
+<span class="tok-nt">&lt;/project&gt;</span></code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>$ ant junit
+Buildfile: /Users/bruel/HelloWorld/build.xml
+
+compile:
+
+jar:
+
+junit:
+    [junit] Running TestHelloWorld
+    [junit] Tests run: 2, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 0,003 sec
+    [junit] Test TestHelloWorld FAILED
+
+BUILD SUCCESSFUL
+Total time: 1 second</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">src/TestHelloWorld.java (un vrai ce coup-ci)</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="java"><span class="tok-kn">package</span> <span class="tok-n">org</span><span class="tok-o">.</span><span class="tok-na">jmb</span><span class="tok-o">;</span>
+<span class="tok-kn">import</span> <span class="tok-nn">static</span> <span class="tok-n">org</span><span class="tok-o">.</span><span class="tok-na">junit</span><span class="tok-o">.</span><span class="tok-na">Assert</span><span class="tok-o">.*;</span>
+
+<span class="tok-kn">import</span> <span class="tok-nn">org.junit.Before</span><span class="tok-o">;</span>
+<span class="tok-kn">import</span> <span class="tok-nn">org.junit.Test</span><span class="tok-o">;</span>
+
+
+<span class="tok-kd">public</span> <span class="tok-kd">class</span> <span class="tok-nc">TestHelloWorldReal</span> <span class="tok-o">{</span>
+
+   <span class="tok-kd">private</span> <span class="tok-n">HelloWorld</span> <span class="tok-n">h</span><span class="tok-o">;</span>
+
+   <span class="tok-nd">@Before</span>
+   <span class="tok-kd">public</span> <span class="tok-kt">void</span> <span class="tok-nf">setUp</span><span class="tok-o">()</span> <span class="tok-kd">throws</span> <span class="tok-n">Exception</span>
+   <span class="tok-o">{</span>
+      <span class="tok-n">h</span> <span class="tok-o">=</span> <span class="tok-k">new</span> <span class="tok-nf">HelloWorld</span><span class="tok-o">();</span>
+   <span class="tok-o">}</span>
+
+   <span class="tok-nd">@Test</span>
+   <span class="tok-kd">public</span> <span class="tok-kt">void</span> <span class="tok-nf">testHelloEmpty</span><span class="tok-o">()</span>
+   <span class="tok-o">{</span>
+      <span class="tok-n">assertEquals</span><span class="tok-o">(</span><span class="tok-n">h</span><span class="tok-o">.</span><span class="tok-na">getName</span><span class="tok-o">(),</span><span class="tok-s">""</span><span class="tok-o">);</span>
+      <span class="tok-n">assertEquals</span><span class="tok-o">(</span><span class="tok-n">h</span><span class="tok-o">.</span><span class="tok-na">getMessage</span><span class="tok-o">(),</span><span class="tok-s">"Hello!"</span><span class="tok-o">);</span>
+   <span class="tok-o">}</span>
+
+   <span class="tok-nd">@Test</span>
+   <span class="tok-kd">public</span> <span class="tok-kt">void</span> <span class="tok-nf">testHelloWorld</span><span class="tok-o">()</span>
+   <span class="tok-o">{</span>
+      <span class="tok-n">h</span><span class="tok-o">.</span><span class="tok-na">setName</span><span class="tok-o">(</span><span class="tok-s">"World"</span><span class="tok-o">);</span>
+      <span class="tok-n">assertEquals</span><span class="tok-o">(</span><span class="tok-n">h</span><span class="tok-o">.</span><span class="tok-na">getName</span><span class="tok-o">(),</span><span class="tok-s">"World"</span><span class="tok-o">);</span>
+      <span class="tok-n">assertEquals</span><span class="tok-o">(</span><span class="tok-n">h</span><span class="tok-o">.</span><span class="tok-na">getMessage</span><span class="tok-o">(),</span><span class="tok-s">"Hello World!"</span><span class="tok-o">);</span>
+   <span class="tok-o">}</span>
+<span class="tok-o">}</span></code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/eclipseTest.png" alt="eclipseTest" width="90%">
+</div>
+<div class="title">Figure 6. Un test exécuté sous eclipse</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tbody><tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>Ne pas hésiter à utiliser le plugin <a href="http://infinitest.github.io/">infinitest</a>.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/infinitest.png" alt="infinitest" width="90%">
+</div>
+<div class="title">Figure 7. Utilisation d’infinitest sous eclipse</div>
+</div>
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_eclipse">4.3.7. Eclipse</h4>
+<div class="paragraph">
+<p>Profiter de la génération de fichier de build <a href="http://ant.apache.org/">ant</a> par <a href="http://www.eclipse.org/">Eclipse</a>!</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/exportAnt.png" alt="exportAnt" width="100%">
+</div>
+<div class="title">Figure 8. Export du bild ant sous eclipse</div>
+</div>
+<div class="listingblock">
+<div class="title">build.xml (généré par eclipse)</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="xml"><span class="tok-cp">&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;</span>
+<span class="tok-c">&lt;!-- WARNING: Eclipse auto-generated file.</span>
+<span class="tok-c">              Any modifications will be overwritten.</span>
+<span class="tok-c">              To include a user specific buildfile here, simply create one in the same</span>
+<span class="tok-c">              directory with the processing instruction &lt;?eclipse.ant.import?&gt;</span>
+<span class="tok-c">              as the first entry and export the buildfile again. --&gt;</span><span class="tok-nt">&lt;project</span> <span class="tok-na">basedir=</span><span class="tok-s">"."</span> <span class="tok-na">default=</span><span class="tok-s">"build"</span> <span class="tok-na">name=</span><span class="tok-s">"HelloWorld"</span><span class="tok-nt">&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">environment=</span><span class="tok-s">"env"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"junit.output.dir"</span> <span class="tok-na">value=</span><span class="tok-s">"junit"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"debuglevel"</span> <span class="tok-na">value=</span><span class="tok-s">"source,lines,vars"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"target"</span> <span class="tok-na">value=</span><span class="tok-s">"1.8"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;property</span> <span class="tok-na">name=</span><span class="tok-s">"source"</span> <span class="tok-na">value=</span><span class="tok-s">"1.8"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;path</span> <span class="tok-na">id=</span><span class="tok-s">"JUnit 4.libraryclasspath"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;pathelement</span> <span class="tok-na">location=</span><span class="tok-s">"../../../.p2/pool/plugins/org.junit_4.12.0.v201504281640/junit.jar"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;pathelement</span> <span class="tok-na">location=</span><span class="tok-s">"../../../.p2/pool/plugins/org.hamcrest.core_1.3.0.v201303031735.jar"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/path&gt;</span>
+    <span class="tok-nt">&lt;path</span> <span class="tok-na">id=</span><span class="tok-s">"HelloWorld.classpath"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;pathelement</span> <span class="tok-na">location=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;path</span> <span class="tok-na">refid=</span><span class="tok-s">"JUnit 4.libraryclasspath"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/path&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"init"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;copy</span> <span class="tok-na">includeemptydirs=</span><span class="tok-s">"false"</span> <span class="tok-na">todir=</span><span class="tok-s">"bin"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;fileset</span> <span class="tok-na">dir=</span><span class="tok-s">"src"</span><span class="tok-nt">&gt;</span>
+                <span class="tok-nt">&lt;exclude</span> <span class="tok-na">name=</span><span class="tok-s">"**/*.launch"</span><span class="tok-nt">/&gt;</span>
+                <span class="tok-nt">&lt;exclude</span> <span class="tok-na">name=</span><span class="tok-s">"**/*.java"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/fileset&gt;</span>
+        <span class="tok-nt">&lt;/copy&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"clean"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;delete</span> <span class="tok-na">dir=</span><span class="tok-s">"bin"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">depends=</span><span class="tok-s">"clean"</span> <span class="tok-na">name=</span><span class="tok-s">"cleanall"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">depends=</span><span class="tok-s">"build-subprojects,build-project"</span> <span class="tok-na">name=</span><span class="tok-s">"build"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"build-subprojects"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">depends=</span><span class="tok-s">"init"</span> <span class="tok-na">name=</span><span class="tok-s">"build-project"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;echo</span> <span class="tok-na">message=</span><span class="tok-s">"${ant.project.name}: ${ant.file}"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;javac</span> <span class="tok-na">debug=</span><span class="tok-s">"true"</span> <span class="tok-na">debuglevel=</span><span class="tok-s">"${debuglevel}"</span> <span class="tok-na">destdir=</span><span class="tok-s">"bin"</span> <span class="tok-na">includeantruntime=</span><span class="tok-s">"false"</span> <span class="tok-na">source=</span><span class="tok-s">"${source}"</span> <span class="tok-na">target=</span><span class="tok-s">"${target}"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;src</span> <span class="tok-na">path=</span><span class="tok-s">"src"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;classpath</span> <span class="tok-na">refid=</span><span class="tok-s">"HelloWorld.classpath"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;/javac&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">description=</span><span class="tok-s">"Build all projects which reference this project. Useful to propagate changes."</span> <span class="tok-na">name=</span><span class="tok-s">"build-refprojects"</span><span class="tok-nt">/&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"Main"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;java</span> <span class="tok-na">classname=</span><span class="tok-s">"org.jmb.Main"</span> <span class="tok-na">failonerror=</span><span class="tok-s">"true"</span> <span class="tok-na">fork=</span><span class="tok-s">"yes"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;classpath</span> <span class="tok-na">refid=</span><span class="tok-s">"HelloWorld.classpath"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;/java&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"TestHelloWorld"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;mkdir</span> <span class="tok-na">dir=</span><span class="tok-s">"${junit.output.dir}"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;junit</span> <span class="tok-na">fork=</span><span class="tok-s">"yes"</span> <span class="tok-na">printsummary=</span><span class="tok-s">"withOutAndErr"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;formatter</span> <span class="tok-na">type=</span><span class="tok-s">"xml"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;test</span> <span class="tok-na">name=</span><span class="tok-s">"org.jmb.TestHelloWorld"</span> <span class="tok-na">todir=</span><span class="tok-s">"${junit.output.dir}"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;jvmarg</span> <span class="tok-na">line=</span><span class="tok-s">"-ea"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;classpath</span> <span class="tok-na">refid=</span><span class="tok-s">"HelloWorld.classpath"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;/junit&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+    <span class="tok-nt">&lt;target</span> <span class="tok-na">name=</span><span class="tok-s">"junitreport"</span><span class="tok-nt">&gt;</span>
+        <span class="tok-nt">&lt;junitreport</span> <span class="tok-na">todir=</span><span class="tok-s">"${junit.output.dir}"</span><span class="tok-nt">&gt;</span>
+            <span class="tok-nt">&lt;fileset</span> <span class="tok-na">dir=</span><span class="tok-s">"${junit.output.dir}"</span><span class="tok-nt">&gt;</span>
+                <span class="tok-nt">&lt;include</span> <span class="tok-na">name=</span><span class="tok-s">"TEST-*.xml"</span><span class="tok-nt">/&gt;</span>
+            <span class="tok-nt">&lt;/fileset&gt;</span>
+            <span class="tok-nt">&lt;report</span> <span class="tok-na">format=</span><span class="tok-s">"frames"</span> <span class="tok-na">todir=</span><span class="tok-s">"${junit.output.dir}"</span><span class="tok-nt">/&gt;</span>
+        <span class="tok-nt">&lt;/junitreport&gt;</span>
+    <span class="tok-nt">&lt;/target&gt;</span>
+<span class="tok-nt">&lt;/project&gt;</span></code></pre>
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/runAnt.png" alt="runAnt" width="100%">
+</div>
+<div class="title">Figure 9. Run de ant sous eclipse</div>
+</div>
+<div class="paragraph">
+<p>Autre avantage de junit, la génération de pages web (répertoire <code>junit</code>, ouvrir <code>index.html</code>).</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/junitreport.png" alt="junitreport" width="90%">
+</div>
+<div class="title">Figure 10. Présentation des résultats de test</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_integration_continue">4.3.8. Integration Continue</h4>
+<div class="listingblock">
+<div class="title">&nbsp;.gitlab-ci.yml (ajouté à la racine du projet git)</div>
+<div class="content">
+<pre class="pygments highlight"><code data-lang="yml"><span class="tok-l-Scalar-Plain">image</span><span class="tok-p-Indicator">:</span> <span class="tok-l-Scalar-Plain">openjdk:8</span>
+
+<span class="tok-l-Scalar-Plain">before_script</span><span class="tok-p-Indicator">:</span>
+  <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">apt-get update</span>
+  <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">apt-get -y install ant</span>
+
+<span class="tok-l-Scalar-Plain">stages</span><span class="tok-p-Indicator">:</span>
+  <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">build</span>
+  <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">test</span>
+
+<span class="tok-l-Scalar-Plain">ci_build</span><span class="tok-p-Indicator">:</span>
+  <span class="tok-l-Scalar-Plain">stage</span><span class="tok-p-Indicator">:</span> <span class="tok-l-Scalar-Plain">build</span>
+  <span class="tok-l-Scalar-Plain">script</span><span class="tok-p-Indicator">:</span>
+    <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">cd HelloWorld</span>
+    <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">ant clean</span>
+    <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">ant build</span>
+
+<span class="tok-l-Scalar-Plain">ci_test</span><span class="tok-p-Indicator">:</span>
+  <span class="tok-l-Scalar-Plain">stage</span><span class="tok-p-Indicator">:</span> <span class="tok-l-Scalar-Plain">test</span>
+  <span class="tok-l-Scalar-Plain">script</span><span class="tok-p-Indicator">:</span>
+    <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">cd HelloWorld</span>
+    <span class="tok-p-Indicator">-</span> <span class="tok-l-Scalar-Plain">ant clean build TestHelloWorld</span></code></pre>
+</div>
+</div>
+<div class="admonitionblock warning">
+<table>
+<tbody><tr>
+<td class="icon">
+<i class="fa icon-warning" title="Warning"></i>
+</td>
+<td class="content">
+Il faut modifier éventuellement le <code>build.xml</code>, souvent trop lié à <a href="http://www.eclipse.org/">Eclipse</a>.
+</td>
+</tr>
+</tbody></table>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_divers">5. Divers</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_quand_on_ne_veux_pas_lancer_l_ic">5.1. Quand on ne veux pas lancer l’IC</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="pygments highlight"><code>git commit -m "Blabla... [ci skip]"</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_pour_vérifier_la_syntaxe_de_son_fichier_yaml">5.2. Pour vérifier la syntaxe de son fichier YAML</h3>
+<div class="paragraph">
+<p>Possibilité de tester son fichier <code>gitlab-ci.yml</code> :</p>
+</div>
+<div class="paragraph">
+<p><a href="https://gitlab.com/ci/lint" class="bare">https://gitlab.com/ci/lint</a></p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="Int%C3%A9gration%20continue%20avec%20gitlab_fichiers/lint.png" alt="lint" width="50%">
+</div>
+<div class="title">Figure 11. Validation de son code YAML</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_liens_utiles">6. Liens utiles</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Le site de référence</dt>
+<dd>
+<p><a href="https://about.gitlab.com/gitlab-ci/" class="bare">https://about.gitlab.com/gitlab-ci/</a></p>
+</dd>
+<dt class="hdlist1">Un tuto en français sur l’IC sous <span class="icon"><i class="fa fa-gitlab"></i></span><a href="https://gitlab.com/">GitLab</a> (merci <span class="icon"><i class="fa fa-twitter"></i></span> @npm_kader)</dt>
+<dd>
+<p><a href="https://www.grafikart.fr/tutoriels/divers/gitlab-ci-docker-808" class="bare">https://www.grafikart.fr/tutoriels/divers/gitlab-ci-docker-808</a></p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 1.0 2016-09-30<br>
+Last updated 2016-09-30 07:25:44 CEST
+</div>
+</div>
+
+<div style="display: block;" id="SL_balloon_obj"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/imtranslator-s.png&quot;) repeat scroll 0% 0%; display: none; width: 24px; height: 24px; position: absolute; cursor: pointer; opacity: 1;" id="SL_button"></div><div style="display: none; margin-top: 30px; margin-left: 1px; direction: ltr; text-align: left; min-height: 40px;" id="SL_shadow_translation_result2"><div></div></div><div style="display: none;" id="SL_shadow_translator"><div id="SL_providers"><div id="SL_P0" title="Google" class="SL_BL_LABLE_ON">G</div><div id="SL_P1" title="Microsoft" class="SL_BL_LABLE_ON">M</div><div id="SL_P2" title="Translator" class="SL_BL_LABLE_ON">T</div></div><div style="background: rgb(244, 245, 245) url(&quot;chrome://imtranslator/content/img/util/bg2.png&quot;) repeat scroll 0% 0%;" id="SL_planshet"><div id="SL_arrow_up"></div><div id="SL_TB"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/imtranslator-s.png&quot;) repeat scroll 0% 0%; display: block; width: 24px; height: 24px; position: absolute;" id="bubblelogo"></div><table id="SL_tables"><tr><td align="right" width="10%"><input title="Fixer la langue" id="SLloc" type="checkbox"></td><td align="left" width="20%"><select id="SL_lng_from"><option selected="selected" value="auto">Détecter la langue</option><option value="af">Afrikaans</option><option value="sq">Albanais</option><option value="de">Allemand</option><option value="en">Anglais</option><option value="ar">Arabe</option><option value="hy">Arménien</option><option value="az">Azéri</option><option value="eu">Basque</option><option value="bn">Bengali</option><option value="be">Biélorusse</option><option value="my">Birman</option><option value="bs">Bosniaque</option><option value="bg">Bulgare</option><option value="ca">Catalan</option><option value="ceb">Cebuano</option><option value="ny">Chichewa</option><option value="zh-CN">Chinois (Simp)</option><option value="zh-TW">Chinois (Trad)</option><option value="si">Cingalai</option><option value="ko">Coréen</option><option value="ht">Créole haïtien</option><option value="hr">Croate</option><option value="da">Danois</option><option value="es">Espagnol</option><option value="eo">Espéranto</option><option value="et">Estonien</option><option value="fi">Finnois</option><option value="fr">Français</option><option value="gl">Galicien</option><option value="cy">Gallois</option><option value="ka">Géorgien</option><option value="gu">Goudjarati</option><option value="el">Grec</option><option value="ha">Haoussa</option><option value="iw">Hébreu</option><option value="hi">Hindi</option><option value="hmn">Hmong</option><option value="hu">Hongrois</option><option value="ig">Igbo</option><option value="id">Indonésien</option><option value="ga">Irlandais</option><option value="is">Islandais</option><option value="it">Italien</option><option value="ja">Japonais</option><option value="jw">Javanais</option><option value="kn">Kannada</option><option value="kk">Kazakh</option><option value="km">Khmer</option><option value="lo">Laotien</option><option value="la">Latin</option><option value="lv">Letton</option><option value="lt">Lituanien</option><option value="mk">Macédonien</option><option value="ms">Malaisien</option><option value="ml">Malayalam</option><option value="mg">Malgache</option><option value="mt">Maltais</option><option value="mi">Maori</option><option value="mr">Marathi</option><option value="mn">Mongol</option><option value="nl">Néerlandais</option><option value="ne">Népalais</option><option value="no">Norvégien</option><option value="uz">Ouzbek</option><option value="pa">Panjabi</option><option value="fa">Persan</option><option value="pl">Polonais</option><option value="pt">Portugais</option><option value="ro">Roumain</option><option value="ru">Russe</option><option value="sr">Serbe</option><option value="st">Sesotho</option><option value="sk">Slovaque</option><option value="sl">Slovène</option><option value="so">Somali</option><option value="su">Soudanais</option><option value="sv">Suédois</option><option value="sw">Swahili</option><option value="tg">Tadjik</option><option value="tl">Tagalog</option><option value="ta">Tamoul</option><option value="cs">Tchèque</option><option value="te">Telugu</option><option value="th">Thaï</option><option value="tr">Turc</option><option value="uk">Ukrainien</option><option value="ur">Urdu</option><option value="vi">Vietnamien</option><option value="yi">Yiddish</option><option value="yo">Yorouba</option><option value="zu">Zoulou</option></select></td><td align="center" width="5%"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/switchb.png&quot;) repeat scroll 0% 0%; display: block; width: 10px; height: 10px; cursor: pointer;" title="Invertir les langues" id="SL_switch_b" align="center"></div></td><td align="left" width="20%"><select id="SL_lng_to"><option value="af">Afrikaans</option><option value="sq">Albanais</option><option value="de">Allemand</option><option value="en">Anglais</option><option value="ar">Arabe</option><option value="hy">Arménien</option><option value="az">Azéri</option><option value="eu">Basque</option><option value="bn">Bengali</option><option value="be">Biélorusse</option><option value="my">Birman</option><option value="bs">Bosniaque</option><option value="bg">Bulgare</option><option value="ca">Catalan</option><option value="ceb">Cebuano</option><option value="ny">Chichewa</option><option value="zh-CN">Chinois (Simp)</option><option value="zh-TW">Chinois (Trad)</option><option value="si">Cingalai</option><option value="ko">Coréen</option><option value="ht">Créole haïtien</option><option value="hr">Croate</option><option value="da">Danois</option><option selected="selected" value="es">Espagnol</option><option value="eo">Espéranto</option><option value="et">Estonien</option><option value="fi">Finnois</option><option value="fr">Français</option><option value="gl">Galicien</option><option value="cy">Gallois</option><option value="ka">Géorgien</option><option value="gu">Goudjarati</option><option value="el">Grec</option><option value="ha">Haoussa</option><option value="iw">Hébreu</option><option value="hi">Hindi</option><option value="hmn">Hmong</option><option value="hu">Hongrois</option><option value="ig">Igbo</option><option value="id">Indonésien</option><option value="ga">Irlandais</option><option value="is">Islandais</option><option value="it">Italien</option><option value="ja">Japonais</option><option value="jw">Javanais</option><option value="kn">Kannada</option><option value="kk">Kazakh</option><option value="km">Khmer</option><option value="lo">Laotien</option><option value="la">Latin</option><option value="lv">Letton</option><option value="lt">Lituanien</option><option value="mk">Macédonien</option><option value="ms">Malaisien</option><option value="ml">Malayalam</option><option value="mg">Malgache</option><option value="mt">Maltais</option><option value="mi">Maori</option><option value="mr">Marathi</option><option value="mn">Mongol</option><option value="nl">Néerlandais</option><option value="ne">Népalais</option><option value="no">Norvégien</option><option value="uz">Ouzbek</option><option value="pa">Panjabi</option><option value="fa">Persan</option><option value="pl">Polonais</option><option value="pt">Portugais</option><option value="ro">Roumain</option><option value="ru">Russe</option><option value="sr">Serbe</option><option value="st">Sesotho</option><option value="sk">Slovaque</option><option value="sl">Slovène</option><option value="so">Somali</option><option value="su">Soudanais</option><option value="sv">Suédois</option><option value="sw">Swahili</option><option value="tg">Tadjik</option><option value="tl">Tagalog</option><option value="ta">Tamoul</option><option value="cs">Tchèque</option><option value="te">Telugu</option><option value="th">Thaï</option><option value="tr">Turc</option><option value="uk">Ukrainien</option><option value="ur">Urdu</option><option value="vi">Vietnamien</option><option value="yi">Yiddish</option><option value="yo">Yorouba</option><option value="zu">Zoulou</option></select></td><td align="center" width="5%"> </td><td align="center" width="6%"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/tts-voice.png&quot;) repeat scroll 0% 0%;" title="Écouter" id="SL_TTS_voice"></div></td><td align="center" width="6%"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/copy_hand.png&quot;) repeat scroll 0% 0%;" title="Copier" id="SL_copy"></div></td><td align="center" width="6%"><div title="Cette fonction est désactivée dans le Dictionnaire" id="SL_bbl_font_patch"></div><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/font-off.png&quot;) repeat scroll 0% 0%;" title="Taille de police" id="SL_bbl_font"></div></td><td align="center" width="6%"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/history.png&quot;) repeat scroll 0% 0%;" title="Historique des traductions" id="SL_TH"></div></td><td width="10%"></td><td align="right" width="6%"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/pin-off.png&quot;) repeat scroll 0% 0%; display: block; width: 16px; height: 16px; cursor: pointer;" title="Fixer le traducteur pop-up" id="SL_pin"></div></td></tr></table></div><div id="SL_alert_bbl"><div id="SLHKclose"></div><div id="SL_alert_cont"></div></div></div><div style="background: rgb(255, 255, 255) url(&quot;chrome://imtranslator/content/img/util/bg.png&quot;) repeat scroll 0% 0%; visibility: visible; min-height: 40px;" id="SL_shadow_translation_result"><div></div></div><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/indicator.gif&quot;) repeat scroll 0% 0%; display: block; position: absolute; width: 35px; margin-left: 180px; margin-top: -40px; height: 35px;" id="SL_loading"></div><div style="display: none; height: 0px; width: 0px;" id="SL_player2"></div><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/bg2.png&quot;) repeat scroll 0% 0%; display: none;" id="SL_alert100">Fonction Sound est limitée à 100 caractères</div><div style="background: rgb(255, 255, 255) none repeat scroll 0% 0%;" id="SL_Balloon_options"><div id="SL_arrow_down"></div><table width="100%"><tr><td align="left" height="16" width="18%"><div style="background: transparent url(&quot;chrome://imtranslator/content/img/util/donate2.png&quot;) repeat scroll 0% 0%;" title="Faire une contribution" id="SL_bbl_donate"></div></td><td align="center" width="68%"><a title="Afficher les options" id="OPlnk" href="#">Options</a> : <a title="Historique des traductions" id="HISTlnk" href="#">Historique</a> : <a title="Aide" id="HELPlnk" target="_blank" href="http://about.imtranslator.net/tutorials/presentations/imtranslator-translator-for-firefox/popup-bubble-application/">Aide</a> : <a title="Commentaires" id="FBlnk" href="#">Commentaires</a></td><td align="right" width="15%"><a title="Fermer" href="#" id="SL_Balloon_Close">Fermer</a></td></tr></table></div></div></div></body></html>
